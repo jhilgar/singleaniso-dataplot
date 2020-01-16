@@ -1,7 +1,7 @@
 function plot_singleaniso(filename)
     singleaniso_data = parse_singleaniso(filename);
     makeFigure();
-    printLabels(singleaniso_data{1}, singleaniso_data{3}, 4);
+    printLabels(singleaniso_data{1}, singleaniso_data{3});
     plotTransitions(singleaniso_data{1}, singleaniso_data{2});
     plotStates(singleaniso_data{1}, false);
 end
@@ -22,7 +22,7 @@ function makeFigure()
     setpixelposition(fig, [10 10 550 550]);
 end
 
-function printLabels(states, wavefunctions, num_labels)
+function printLabels(states, wavefunctions)
     text(states(:, 1) + 3.0, states(:, 2), compose('$\\mathbf{%.1f\\%%}$', max(wavefunctions) ./ sum(wavefunctions) .* 100), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'Interpreter', 'latex', 'Fontsize', 10.5, 'Clipping', 'on');
     wavefunction_labels = compose('$\\mathbf{\\pm|\\frac{%d}{2}\\rangle}$', abs(-15:2:15));
     [~, wavefunction_indices] = max(wavefunctions);
