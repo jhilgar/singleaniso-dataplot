@@ -22,10 +22,13 @@ function output = parse_singleaniso(filename)
         % wavefunction contributions, absolute value of coefficients
         if contains(tline, '/2> |')
             newStr = strtrim(split(tline, '|'));
-            if length(newStr) == 9
-                newStr = split({newStr{3}; newStr{5}; newStr{7}}, {'  ', ' '});
-                newDbl = str2double({newStr{1,:}, newStr{2,:}, newStr{3,:}});
-                wave_functions = [wave_functions; abs(newDbl(1:2:5) + newDbl(2:2:6).*1i)];
+            if length(newStr) == 7
+                newStr = split(newStr{4}, ' ');
+                newDbl = str2double(newStr{1});
+                wave_functions = [wave_functions; newDbl];
+                %newStr = split({newStr{3}; newStr{5}; newStr{7}}, {'  ', ' '});
+                %newDbl = str2double({newStr{1,:}, newStr{2,:}, newStr{3,:}});
+                %wave_functions = [wave_functions; abs(newDbl(1:2:5) + newDbl(2:2:6).*1i)];
             end
         end
 
@@ -41,15 +44,16 @@ function output = parse_singleaniso(filename)
         tline = fgetl(fileID);
     end
     fclose(fileID);
-
+    
     % reorganize state information
     states = [moments, energies];
     % reorganize and extract wavefunction contributions, doublets truncated
-    wave_functions = arrayfun(@(x) wave_functions((x-1)*16+(1:16),:), (1:5), 'UniformOutput', false);
-    wave_functions = [wave_functions{:}];
-    wave_functions = wave_functions(:, 1:2:15);
+    wave_functions = reshape(wave_functions, 16, 8);
+    %wave_functions = arrayfun(@(x) wave_functions((x-1)*16+(1:16),:), (1:5), 'UniformOutput', false);
+    %wave_functions = [wave_functions{:}];
+    %wave_functions = wave_functions(:, 1:2:15);
     % reorganize and extract matrix elements, only: +1 -> -1 ; +1 -> +2 ; +1 -> -2
-    matrix_elements = [matrix_elements(1:8), [matrix_elements(9:2:21); 0], [matrix_elements(10:2:22); 0]];
+    matrix_elements = [matrix_elements(2:2:16), [matrix_elements(17:2:29); NaN], [matrix_elements(18:2:30); NaN]];
 
     output = {states, matrix_elements, wave_functions};
 end
