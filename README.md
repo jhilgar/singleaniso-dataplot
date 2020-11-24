@@ -1,5 +1,5 @@
 # singleaniso-dataplot
-A collection of MATLAB functions that parse and plot magnetic data from MOLCAS version 8.2. 
+A collection of MATLAB functions that parse and plot magnetic data from OpenMolcas version 18.09
  
 ## Setup
 The folder containing these scripts should be added to your MATLAB path. This can be done by clicking the **Set Path** button under the **Home** tab. See [this](https://www.mathworks.com/help/matlab/matlab_env/add-remove-or-reorder-folders-on-the-search-path.html) for more details.
