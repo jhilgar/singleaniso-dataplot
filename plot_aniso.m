@@ -1,13 +1,13 @@
-function plot_singleaniso(singleaniso_data, varargin)
-    
-    %singleaniso_data = parse_singleaniso(filename);
-    makeFigure();
-    printLabels(singleaniso_data{1}, singleaniso_data{3});
-    plotTransitions(singleaniso_data{1}, singleaniso_data{2}, varargin{:});
-    plotStates(singleaniso_data{1}, false);
+function plot_aniso(data, varargin)
+    make_figure();
+    if isfield(data, 'wave_functions')
+        print_labels(data.states, data.wave_functions);
+    end
+    plot_transitions(data.states, data.matrix_elements, varargin{:});
+    plot_states(data.states, false);
 end
 
-function makeFigure()
+function make_figure()
     fig = figure();
     box('on');
     ax = gca();
@@ -18,27 +18,28 @@ function makeFigure()
     ylabel('Energy (cm^{-1})', 'FontSize', 11, 'FontWeight', 'bold');
     xlabel('Moment (\mu_B)', 'FontSize', 11, 'FontWeight', 'bold');
     hold('on');
-    %xlim([-14 14]);
-    %ylim([-30 410]);
     setpixelposition(fig, [10 10 550 550]);
 end
 
-function printLabels(states, wavefunctions)
+function print_labels(states, wavefunctions)
     text(-states(:, 1) + 5.0, states(:, 2), compose('$\\mathbf{%.1f\\%%}$', max(wavefunctions) ./ sum(wavefunctions) .* 100), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'Interpreter', 'latex', 'Fontsize', 10.5, 'Clipping', 'on');
     wavefunction_labels = compose('$\\mathbf{\\pm|\\frac{%d}{2}\\rangle}$', abs(-15:2:15));
     [~, wavefunction_indices] = max(wavefunctions);
     text(states(:, 1) - 5, states(:, 2), wavefunction_labels(wavefunction_indices), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'Interpreter', 'latex', 'Fontsize', 13.5, 'Clipping', 'on');
 end
 
-function plotTransitions(states, transitions, varargin)
+function plot_transitions(states, transitions, varargin)
     line_style = '-.';
     line_width = 1;
 
     cmap = jet(500);
     log_transitions = log10(transitions);
-    upper_bound = ceil(max(log_transitions(:)));
-    lower_bound = floor(min(log_transitions(:)));
-    
+    bound_spacing = 5;
+    %upper_bound = ceil(max(log_transitions(:)));
+    %lower_bound = floor(min(log_transitions(:)));
+    %upper_bound = lower_bound + round((upper_bound - lower_bound) / bound_spacing) * bound_spacing;
+    upper_bound = -3;
+    lower_bound = -23;
     p = inputParser;
     p.addParameter('transition_limits', [lower_bound, upper_bound]);
     p.parse(varargin{:});
@@ -53,11 +54,11 @@ function plotTransitions(states, transitions, varargin)
     close_energies = find(abs(states(:, 1)) < 0.8);
     if size(close_energies ~= 0)
         th = linspace(0, pi, 100);
-        R = abs(states(close_energies, 1));  %or whatever radius you want
+        R = abs(states(close_energies, 1) + 1);  %or whatever radius you want
         x = R*cos(th);
         y = (ylim/xlim)*R*sin(th) + states(close_energies, 2);
-        h = plot(x, y, 'LineWidth', 1.3);
-        %set(h, {'Color'}, num2cell(cmap(normlalized_transitions(:, 1), :), 2));
+        h = plot(x, y, 'LineWidth', 1.3, 'LineStyle', line_style);
+        %set(h, {'Color'}, num2cell(cmap(normalized_transitions(:, 1), :), 2));
     end
 
     h = line([-states(1:end-1, 1)'; states(2:end, 1)'], [states(1:end-1, 2)'; states(2:end, 2)'], 'LineStyle', line_style, 'LineWidth', line_width);
@@ -72,10 +73,11 @@ function plotTransitions(states, transitions, varargin)
 
     colormap('jet');
     colorbar('southoutside');
-    %colorbar('southoutside', 'XTick', 0:0.25:1, 'XTickLabel', {'10^{-15}', '10^{-12}', '10^{-9}', '10^{-6}', '10^{-3}'});
+    x_tick_labels = compose('10^{%d}', (lower_bound:bound_spacing:upper_bound));
+    colorbar('southoutside', 'XTick', 0:(1 / (bound_spacing - 1)):1, 'XTickLabel', x_tick_labels);
 end
 
-function plotStates(states, padding)
+function plot_states(states, padding)
     state_width = 1.3; state_padding = 0.2;
     if padding
         line([states(:,1)' - state_width + state_padding; states(:,1)' + state_width + state_padding], [states(:,2)'; states(:,2)'], 'Color', 'white', 'LineWidth', 5);
