@@ -73,7 +73,7 @@ function plot_transitions(states, transitions, varargin)
 
     colormap('jet');
     colorbar('southoutside');
-    x_tick_labels = compose('10^{%d}', (lower_bound:bound_spacing:upper_bound));
+    x_tick_labels = compose('10^{%d}', (lower_bound:(((upper_bound - lower_bound) / bound_spacing)+1):upper_bound));
     colorbar('southoutside', 'XTick', 0:(1 / (bound_spacing - 1)):1, 'XTickLabel', x_tick_labels);
 end
 
