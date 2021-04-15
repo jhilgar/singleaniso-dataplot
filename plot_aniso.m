@@ -57,8 +57,10 @@ function plot_transitions(states, transitions, varargin)
         R = abs(states(close_energies, 1) + 1);  %or whatever radius you want
         x = R*cos(th);
         y = (ylim/xlim)*R*sin(th) + states(close_energies, 2);
-        h = plot(x, y, 'LineWidth', 1.3, 'LineStyle', line_style);
-        %set(h, {'Color'}, num2cell(cmap(normalized_transitions(:, 1), :), 2));
+        for n = [1:length(close_energies)]
+            h = plot(x(n, :), y(n, :), 'LineWidth', 1.3, 'LineStyle', line_style);
+            %set(h, {'Color'}, num2cell(cmap(normalized_transitions(:, 1), :), 2));
+        end
     end
 
     h = line([-states(1:end-1, 1)'; states(2:end, 1)'], [states(1:end-1, 2)'; states(2:end, 2)'], 'LineStyle', line_style, 'LineWidth', line_width);
