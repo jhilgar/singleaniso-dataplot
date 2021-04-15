@@ -22,7 +22,8 @@ function make_figure()
 end
 
 function print_labels(states, wavefunctions)
-    text(-states(:, 1) + 5.0, states(:, 2), compose('$\\mathbf{%.1f\\%%}$', max(wavefunctions) ./ sum(wavefunctions) .* 100), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'Interpreter', 'latex', 'Fontsize', 10.5, 'Clipping', 'on');
+    %text(-states(:, 1) + 5.0, states(:, 2), compose('$\\mathbf{%.1f\\%%}$', max(wavefunctions) ./ sum(wavefunctions) .* 100), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'Interpreter', 'latex', 'Fontsize', 10.5, 'Clipping', 'on');
+    text(-states(:, 1) + 5.0, states(:, 2), compose('$\\mathsf{%.1f\\%%}$', (max(wavefunctions) + wavefunctions(abs([17 49 81 113 145 177 209 241]' - find(wavefunctions == max(wavefunctions))))') ./ sum(wavefunctions) .* 100), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'Interpreter', 'latex', 'Fontsize', 10.5, 'Clipping', 'on');
     wavefunction_labels = compose('$\\mathbf{\\pm|\\frac{%d}{2}\\rangle}$', abs(-15:2:15));
     [~, wavefunction_indices] = max(wavefunctions);
     text(states(:, 1) - 5, states(:, 2), wavefunction_labels(wavefunction_indices), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'Interpreter', 'latex', 'Fontsize', 13.5, 'Clipping', 'on');
@@ -75,8 +76,10 @@ function plot_transitions(states, transitions, varargin)
 
     colormap('jet');
     colorbar('southoutside');
-    x_tick_labels = compose('10^{%d}', (lower_bound:bound_spacing:upper_bound));
-    colorbar('southoutside', 'XTick', 0:(1 / (bound_spacing - 1)):1, 'XTickLabel', x_tick_labels);
+    x_tick_labels = compose('10^{%d}', (lower_bound:(((upper_bound - lower_bound) / (bound_spacing-1))):upper_bound));
+    cbar = colorbar('southoutside', 'XTick', 0:(1 / (bound_spacing - 1)):1, 'XTickLabel', x_tick_labels);
+    cbar.Label.String = 'Transition Matrix Element'; cbar.Label.FontSize = 16; cbar.Label.FontWeight = 'bold';
+    cbar.Box = 'on'; cbar.LineWidth = 1.5;
 end
 
 function plot_states(states, padding)
