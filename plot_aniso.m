@@ -21,11 +21,17 @@ function make_figure()
     setpixelposition(fig, [10 10 550 550]);
 end
 
-function print_labels(states, wavefunctions)
-    text(-states(:, 1) + 5.0, states(:, 2), compose('$\\mathbf{%.1f\\%%}$', max(wavefunctions) ./ sum(wavefunctions) .* 100), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'Interpreter', 'latex', 'Fontsize', 10.5, 'Clipping', 'on');
-    wavefunction_labels = compose('$\\mathbf{\\pm|\\frac{%d}{2}\\rangle}$', abs(-15:2:15));
-    [~, wavefunction_indices] = max(wavefunctions);
-    text(states(:, 1) - 5, states(:, 2), wavefunction_labels(wavefunction_indices), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'Interpreter', 'latex', 'Fontsize', 13.5, 'Clipping', 'on');
+function print_labels(states, wavefunctions) %Getting the highest contributor
+    ColumnLength = length(wavefunctions(:, 1)); RowLength = length(wavefunctions(1, :)); %Find how many states you have
+    WavefunctionIndices = ([1:2:ColumnLength] .* ColumnLength + 1); 
+    %The code puts the wavefunctions into one long vector. We need an index of where to "subtract" from later. 
+    text(-states(:, 1) + 5.0, states(:, 2), compose('$\\mathsf{%.1f\\%%}$', (max(wavefunctions) + ...
+        wavefunctions(abs(WavefunctionIndices' - find(wavefunctions == max(wavefunctions))))') ./ sum(wavefunctions) .* 100),...
+        'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'Interpreter', 'latex', 'Fontsize', 16, 'Clipping', 'on'); 
+        %Here we find where the maximum wavefunction contributor and its corresponding inverse-moment state is. The weird indexing is because we're subtracting progressively larger index numbers.
+    wavefunction_labels = compose('$\\mathsf{\\pm|\\frac{%d}{2}\\rangle}$', abs(-(ColumnLength-1):2:(ColumnLength-1))); %Everything past this is printing the labels of what the wavefunction is. Everything above is to find the percentage.
+    text(states(:, 1) - 5, states(:, 2), wavefunction_labels(wavefunction_indices), ...
+        'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'Interpreter', 'latex', 'Fontsize', 18, 'Clipping', 'on');
 end
 
 function plot_transitions(states, transitions, varargin)
@@ -34,12 +40,27 @@ function plot_transitions(states, transitions, varargin)
 
     cmap = jet(500);
     log_transitions = log10(transitions);
-    bound_spacing = 5;
-    %upper_bound = ceil(max(log_transitions(:)));
-    %lower_bound = floor(min(log_transitions(:)));
-    %upper_bound = lower_bound + round((upper_bound - lower_bound) / bound_spacing) * bound_spacing;
-    upper_bound = -3;
-    lower_bound = -23;
+    
+    %Automatic bounds
+    upper_bound = ceil(max(log_transitions(:)));
+    lower_bound = floor(min(log_transitions(:)));
+    if floor((upper_bound - lower_bound)/5) == ceil((upper_bound - lower_bound)/5)
+        Transition_probability_ticks = 6;
+    elseif floor((upper_bound - lower_bound)/4) == ceil((upper_bound - lower_bound)/4)
+        Transition_probability_ticks = 5;
+    elseif floor((upper_bound - lower_bound)/3) == ceil((upper_bound - lower_bound)/3)
+        Transition_probability_ticks = 4;
+    elseif floor((upper_bound - lower_bound)/2) == ceil((upper_bound - lower_bound)/2)
+        Transition_probability_ticks = 3;
+    else
+        Transition_probability_ticks = 2;
+    end
+   
+    %Manual Bounds
+    %upper_bound = 1;
+    %lower_bound = -5;
+    %Transition_probability_ticks = 2;
+    
     p = inputParser;
     p.addParameter('transition_limits', [lower_bound, upper_bound]);
     p.parse(varargin{:});
@@ -59,7 +80,7 @@ function plot_transitions(states, transitions, varargin)
         y = (ylim/xlim)*R*sin(th) + states(close_energies, 2);
         for n = [1:length(close_energies)]
             h = plot(x(n, :), y(n, :), 'LineWidth', 1.3, 'LineStyle', line_style);
-            %set(h, {'Color'}, num2cell(cmap(normalized_transitions(:, 1), :), 2));
+            set(h, {'Color'}, num2cell(cmap(normalized_transitions(close_energies(n), 1), :), 2));
         end
     end
 
